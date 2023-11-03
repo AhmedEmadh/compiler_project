@@ -235,7 +235,6 @@ public class Main {
         for (int i=0;i<tokens.size();i++){
             System.out.println(tokens.get(i).value + ","+ TokenTypeToString(tokens.get(i).type));
         }
-        System.out.println("}");
     }
     /* it concatenates all characters in a char queue into one string and return it */
     static String queueToString(Queue<Character> queue){
