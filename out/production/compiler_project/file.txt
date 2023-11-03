@@ -1,4 +1,4 @@
-fact{output factorial of x}
+{output factorial of x}
   { Sample program in TINY language –
 computes factorial}
 
@@ -7,7 +7,7 @@ if 0 < x then { don’t compute if
 x <= 0 }
 fact := 1;
 repeat
-fact := fact * x;
+fact := fac35t * x;
 x := x - 1
 until x = 0;
 write fact{output factorial of x}

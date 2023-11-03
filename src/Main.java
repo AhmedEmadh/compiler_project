@@ -6,13 +6,77 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Scanner;
 
+enum Type{SEMICOLON,IF,THEN,END,REPEAT,UNTIL,IDENTIFIER,ASSIGN,READ,WRITE,LESSTHAN,EQUAL,PLUS,MINUS,MULT,DIV,OPENBRACKET,CLOSEBRACKET,NUMBER};
+class Token {
+    String value;
+    Type type;
+    Token(){
+        this.value = "";
+        this.type = Type.SEMICOLON;
+    }
+    Token(String value,Type type){
+        this.value = value;
+        this.type = type;
+    }
+}
 public class Main {
     /* there are the reserved words in the language */
     static String[] reserved_words = {"if","then","else","end","repeat","until","read","write"};
     /* there are the special symbols in the tiny language */
     static String[] special_symbols = {"+","-","*","/","=","<","(",")",";",/*":="*/};
     /* checks if the string is a reserved word or not */
+    static Type ConvertStrToTokenType(String str) {
+        if (str.equals(";")) {
+            return Type.SEMICOLON;
+        } else if (str.equals("if")) {
+            return Type.IF;
+        } else if (str.equals("then")) {
+            return Type.THEN;
+        } else if (str.equals("end")) {
+            return Type.END;
+        } else if (str.equals("repeat")) {
+            return Type.REPEAT;
+        } else if (str.equals("until")) {
+            return Type.UNTIL;
+        } else if (str.equals(":=")) {
+            return Type.ASSIGN;
+        } else if (str.equals("read")) {
+            return Type.READ;
+        } else if (str.equals("write")) {
+            return Type.WRITE;
+        } else if (str.equals("<")) {
+            return Type.LESSTHAN;
+        } else if (str.equals("=")) {
+            return Type.EQUAL;
+        } else if (str.equals("+")) {
+            return Type.PLUS;
+        } else if (str.equals("-")) {
+            return Type.MINUS;
+        } else if (str.equals("*")) {
+            return Type.MULT;
+        }else if (str.equals("/")) {
+            return Type.DIV;
+        }else if (str.equals("(")) {
+            return Type.OPENBRACKET;
+        }else if (str.equals(")")) {
+            return Type.CLOSEBRACKET;
+        }else if (is_number(str)) {
+            return Type.NUMBER;
+        }
+        else if (is_identifier(str)){
+            return Type.IDENTIFIER;
+        }
+        return Type.SEMICOLON;
+    }
+    static ArrayList<Token> ConvertToTokens(ArrayList<String> str_tokens){
+        ArrayList<Token> tokens = new ArrayList<Token>();
+        for(int i=0;i<str_tokens.size();i++){
+            tokens.add(new Token(str_tokens.get(i),ConvertStrToTokenType(str_tokens.get(i))));
+        }
+        return tokens;
+    }
     static boolean is_reserved_word(String s) {
         for (int i = 0; i < reserved_words.length; i++) {
             if (s.equals(reserved_words[i])) {
@@ -51,14 +115,81 @@ public class Main {
     }
     /* checks if the string is a valid identifier in the language */
     static boolean is_identifier(String s){
+        if(!Character.isLetter(s.charAt(0))){
+            return false;
+        }
         for(int i=0;i<s.length();i++){
-            if(!Character.isLetter(s.charAt(i))){
+            /* if the character is not a digit or a letter */
+            if((!Character.isLetter(s.charAt(i)))&&(!Character.isDigit(s.charAt(i)))){
                 return false;
             }
         }
         return true;
     }
     /* checks if a char is a letter */
+    static String TokenTypeToString(Type type){
+        String result = "";
+        switch (type){
+            case SEMICOLON:
+                result = "SEMICOLON";
+                break;
+            case IF:
+                result = "IF";
+                break;
+            case THEN:
+                result = "THEN";
+                break;
+            case END:
+                result = "END";
+            break;
+            case REPEAT:
+                result = "REPEAT";
+            break;
+            case UNTIL:
+                result = "UNTIL";
+            break;
+            case IDENTIFIER:
+                result = "IDENTIFIER";
+                break;
+            case ASSIGN:
+                result = "ASSIGN";
+            break;
+            case READ:
+                result = "READ";
+            break;
+            case WRITE:
+                result = "WRITE";
+            break;
+            case LESSTHAN:
+                result = "LESSTHAN";
+            break;
+            case EQUAL:
+                result = "EQUAL";
+            break;
+            case PLUS:
+                result = "PLUS";
+            break;
+            case MINUS:
+                result = "MINUS";
+            break;
+            case MULT:
+                result = "MULT";
+            break;
+            case DIV:
+                result = "DIV";
+            break;
+            case OPENBRACKET:
+                result = "OPENBRACKET";
+            break;
+            case CLOSEBRACKET:
+                result = "CLOSEBRACKET";
+            break;
+            case NUMBER:
+                result = "NUMBER";
+            break;
+        }
+        return result;
+    }
     static boolean is_letter(char c){
         return Character.isLetter(c);
     }
@@ -99,6 +230,13 @@ public class Main {
         }
         System.out.println("}");
     }
+    static void printTokenArrayList(ArrayList<Token> tokens){
+        System.out.println("Tokens are:");
+        for (int i=0;i<tokens.size();i++){
+            System.out.println(tokens.get(i).value + ","+ TokenTypeToString(tokens.get(i).type));
+        }
+        System.out.println("}");
+    }
     /* it concatenates all characters in a char queue into one string and return it */
     static String queueToString(Queue<Character> queue){
         String result = new String();
@@ -106,6 +244,9 @@ public class Main {
             result = result + queue.poll();
         }
         return result;
+    }
+    static boolean is_number(char c){
+        return Character.isDigit(c);
     }
     /* it is a variable used to store the character pointed in the current iteration */
     static char charAt;
@@ -164,7 +305,7 @@ public class Main {
                     break;
                 case inid:
                     charAt = text.charAt(i);
-                    if (is_letter(charAt)) {
+                    if (is_letter(charAt)||is_number(charAt)) {
                         aQueue.add(charAt);
                         state = State.inid;
                     } else {
@@ -247,9 +388,12 @@ public class Main {
         /* get text from file as a string and put it in text object*/
         String text = getStringFromFile(path);
         /* get tokens from string as dynamic array of strings*/
-        ArrayList<String> tokens = CreateTokens(text);
-        /* print tokens print the string tokens*/
-        System.out.println("Tokens are:");
-        printStringArrayList(tokens);
+        ArrayList<String> str_tokens = CreateTokens(text);
+        /*get tokens as Token type that contains the value and the Type*/
+        ArrayList<Token> tokens = ConvertToTokens(str_tokens);
+        /* print the dynamic array of token types as array */
+        printTokenArrayList(tokens);
+        /* wait for user to press enter to see the output and finish the program */
+        new Scanner(System.in).nextLine();
     }
 }
